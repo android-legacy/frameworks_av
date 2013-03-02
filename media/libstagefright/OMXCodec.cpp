@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2009 The Android Open Source Project
- * Copyright (c) 2010 - 2012, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2010 - 2013, The Linux Foundation. All rights reserved.
  *
  * Not a Contribution, Apache license notifications and license are retained
  * for attribution purposes only.
@@ -67,6 +67,12 @@
 
 #ifdef QCOM_ICS_COMPAT
 #include <gralloc_priv.h>
+#endif
+#ifdef USE_TI_CUSTOM_DOMX
+#include <OMX_TI_Video.h>
+#include <OMX_TI_Index.h>
+#include <OMX_TI_IVCommon.h>
+#include <ctype.h>
 #endif
 
 namespace android {
@@ -627,6 +633,10 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
                 ALOGE("Malformed AVC codec specific data.");
                 return err;
             }
+
+#ifdef QCOM_HARDWARE
+            QCOMXCodec::checkIfInterlaced((const uint8_t *)data, meta);
+#endif
 
             CODEC_LOGI(
                     "AVC profile = %u (%s), level = %u",
@@ -1388,7 +1398,12 @@ status_t OMXCodec::setupAVCEncoderParameters(const sp<MetaData>& meta) {
     h264type.eLevel = static_cast<OMX_VIDEO_AVCLEVELTYPE>(profileLevel.mLevel);
 
     // XXX
+#ifdef USE_TI_DUCATI_H264_PROFILE
+    if ((strncmp(mComponentName, "OMX.TI.DUCATI1", 14) != 0)
+            && (h264type.eProfile != OMX_VIDEO_AVCProfileBaseline)) {
+#else
     if (h264type.eProfile != OMX_VIDEO_AVCProfileBaseline) {
+#endif
         ALOGW("Use baseline profile instead of %d for AVC recording",
             h264type.eProfile);
         h264type.eProfile = OMX_VIDEO_AVCProfileBaseline;
@@ -5305,7 +5320,7 @@ status_t QueryCodec(
     // Color format query
     OMX_VIDEO_PARAM_PORTFORMATTYPE portFormat;
     InitOMXParams(&portFormat);
-    portFormat.nPortIndex = !isEncoder ? 1 : 0;
+    portFormat.nPortIndex = !isEncoder ? 0 : 1;
     for (portFormat.nIndex = 0;; ++portFormat.nIndex)  {
         err = omx->getParameter(
                 node, OMX_IndexParamVideoPortFormat,
