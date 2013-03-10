@@ -121,7 +121,6 @@ LOCAL_SHARED_LIBRARIES := \
         liblog \
         libmedia \
         libmedia_native \
-        libqdutils \
         libsonivox \
         libssl \
         libstagefright_omx \
