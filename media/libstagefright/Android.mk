@@ -3,6 +3,10 @@ include $(CLEAR_VARS)
 
 include frameworks/av/media/libstagefright/codecs/common/Config.mk
 
+ifeq ($(BOARD_HTC_3D_SUPPORT),true)
+   LOCAL_CFLAGS += -DHTC_3D_SUPPORT
+endif
+
 LOCAL_SRC_FILES:=                         \
         ACodec.cpp                        \
         AACExtractor.cpp                  \
@@ -91,7 +95,8 @@ LOCAL_SRC_FILES += \
         QCMediaDefs.cpp                   \
         QCOMXCodec.cpp                    \
         WAVEWriter.cpp                    \
-        ExtendedExtractor.cpp
+        ExtendedExtractor.cpp             \
+        QCUtilityClass.cpp
 
 LOCAL_C_INCLUDES += \
         $(TOP)/hardware/qcom/media/mm-core/inc
