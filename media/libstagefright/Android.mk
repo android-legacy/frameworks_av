@@ -3,6 +3,10 @@ include $(CLEAR_VARS)
 
 include frameworks/av/media/libstagefright/codecs/common/Config.mk
 
+ifeq ($(BOARD_HTC_3D_SUPPORT),true)
+   LOCAL_CFLAGS += -DHTC_3D_SUPPORT
+endif
+
 LOCAL_SRC_FILES:=                         \
         ACodec.cpp                        \
         AACExtractor.cpp                  \
@@ -83,13 +87,17 @@ LOCAL_SRC_FILES += \
         PCMExtractor.cpp
 endif
 
-ifeq ($(TARGET_QCOM_AUDIO_VARIANT),caf)
+ifneq ($(filter caf bfam,$(TARGET_QCOM_AUDIO_VARIANT)),)
     ifeq ($(BOARD_USES_ALSA_AUDIO),true)
         LOCAL_SRC_FILES += LPAPlayerALSA.cpp
         ifeq ($(call is-chipset-in-board-platform,msm8960),true)
             LOCAL_SRC_FILES += TunnelPlayer.cpp
             LOCAL_CFLAGS += -DUSE_TUNNEL_MODE
             LOCAL_CFLAGS += -DTUNNEL_MODE_SUPPORTS_AMRWB
+        endif
+        ifeq ($(call is-chipset-in-board-platform,msm8974),true)
+            LOCAL_SRC_FILES += TunnelPlayer.cpp
+            LOCAL_CFLAGS += -DUSE_TUNNEL_MODE
         endif
         ifeq ($(NO_TUNNEL_MODE_FOR_MULTICHANNEL),true)
             LOCAL_CFLAGS += -DNO_TUNNEL_MODE_FOR_MULTICHANNEL
